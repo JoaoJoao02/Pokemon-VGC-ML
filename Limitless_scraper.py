@@ -2,15 +2,37 @@ import requests as rq
 from bs4 import BeautifulSoup  
 
 
-URL = "https://limitlessvgc.com/teams/"
+URL_teams = "https://limitlessvgc.com/teams/"
+URL_tournaments = "https://limitlessvgc.com/tournaments/"
 
-def sparser(id):
-    current_url = URL + str(id)
+def format_sparser(id):
+    tournament_url = URL_tournaments + str(id)
     try:
-        link = rq.get(current_url, timeout=10)
+        link = rq.get(tournament_url, timeout=10)
         link.raise_for_status()
     except rq.exceptions.RequestException as exc:
-        print(f"Request failed for {current_url}: {exc}")
+        print(f"Request failed for {tournament_url}: {exc}")
+        return None
+    
+    soup = BeautifulSoup(link.text, "html.parser")
+    div_format = soup.find_all('div', class_="infobox-line")
+    format_name = "Unknown"
+    for form in div_format:
+        if form.a:
+            format_name = form.a.text
+
+    return format_name
+
+
+
+
+def sparser(id):
+    team_url = URL_teams + str(id)
+    try:
+        link = rq.get(team_url, timeout=10)
+        link.raise_for_status()
+    except rq.exceptions.RequestException as exc:
+        print(f"Request failed for {team_url}: {exc}")
         return None
 
     soup = BeautifulSoup(link.text, "html.parser")
@@ -51,23 +73,40 @@ def sparser(id):
             tournament_name = "Unknown"
             player_name = "Unknown"
             
+            format_cache = {}
             for link in links:
                 href = link.get('href', '')
                 if href.startswith('/tournaments/'):
-                    tournament_name = link.text.strip()
+                    tournament_id = href.split('tournaments/')[1]
+                    if tournament_id not in format_cache:
+                        format_cache[tournament_id] = format_sparser(tournament_id)
+                    format_name = format_cache[tournament_id]
+                    if ',' in link.text.strip():
+                        tournament_name = link.text.split(',')[0].strip()
+                    else:
+                        tournament_name = link.text.strip()
                 elif href.startswith('/players/'):
                     player_name = link.text.strip()
             
             tournament_entries.append({
                 "tournament": tournament_name,
-                "player": player_name
+                "player": player_name,
+                "format": format_name,
+                "Points": 100
             })
 
-        
-    return {
-        "Url": current_url,
-        "Team": team,
-        "Tournament Info": tournament_entries or ["No tournament data"],
-    }
+    records = []
+    for entry in tournament_entries:
+        records.append({
+            "team_id": "L" + str(id),
+            "player": entry["player"],
+            "tournament": entry["tournament"],
+            "format": entry["format"],
+            "points": entry["Points"],
+            "pokemon": team
+        })
 
-print(sparser(253))
+        
+    return records
+
+print(sparser(6223))

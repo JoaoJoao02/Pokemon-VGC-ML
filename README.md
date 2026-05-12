@@ -10,7 +10,7 @@ With the release of Pokemon Champions, one of the tallest barriers to entry is t
 There are endless possibilities.
 
 I'll fetch data from Tournaments, Videos, Webpages, Games and use that to train an Machine Learning model that helps the user building a team.
-I'll build another model that helps the Machine Learning model to make decision by using damaging calculations for certain pokemon interactions.
+I'll build another model that helps the Machine Learning model to make decisions by using damaging calculations for certain pokemon interactions.
 
 Some example of prompts:
 Q: "I love Charizard, build me a team that works well with Charizard"
