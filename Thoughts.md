@@ -49,3 +49,9 @@ Also there was a problem with the "Tournament Info" key in the parser -> I was a
 For now I think the problem is almost solved, the only thing that I want to change for now is to implement a function that retrieves the format from the tournament page, that way I don't have to hard code it. I'll fetch format first in the tournament page and then inside that page I'll assign the teams that are there. 
 
 ONE THING THAT IS GIVING ME A HUGE HEADACHE FOR DEDUPLICATION IS "WHAT IF IN THE LIMITLESS HAS ONE NAME FOR THE TOURNAMENT AND IN THE EXCEL HAS ANOTHER..." I can normalize tournament names, but how do I distuinguish between regional prague 2024 and 2025, even worse if they are in the same format, and I can't think of a way to solve this for now.
+
+The last thing was the format/tournament scraper: In the team page we have a link with the tournament, so what I do is I get that link, "open" the link and get the tournament, there I scrape the format, and attach to the dictionairy.
+
+## Thoughts after scraping
+I have around 7000 teams, that is ok enough to at least get a partner/item recommendation.
+I forgot about one thing that is actually important which is win rate, because stronger win rate between partners means stronger relationship, also if I want my model to predict counters I obviously need to know win rate, aswell as teams that played against each other and that is tough. I need to work on a formula for that. What I'll do is, I'll make a model for now that predicts the best partner, and I'll see if it works well enough, then I think about the problems that come after.

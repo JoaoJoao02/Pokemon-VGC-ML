@@ -1,9 +1,12 @@
 import requests as rq
 from bs4 import BeautifulSoup  
+import time
+import json
 
 
 URL_teams = "https://limitlessvgc.com/teams/"
 URL_tournaments = "https://limitlessvgc.com/tournaments/"
+format_cache = {}
 
 def format_sparser(id):
     tournament_url = URL_tournaments + str(id)
@@ -65,15 +68,15 @@ def sparser(id):
             "Moves": move_list or ["No moves"]
         })
 
+    tournament_entries = []
     for t in div_tournament:
         tournament = t.find('ul')
-        tournament_entries = []
         for li in tournament.find_all('li'):
             links = li.find_all('a')
             tournament_name = "Unknown"
             player_name = "Unknown"
             
-            format_cache = {}
+            
             for link in links:
                 href = link.get('href', '')
                 if href.startswith('/tournaments/'):
@@ -109,4 +112,27 @@ def sparser(id):
         
     return records
 
-print(sparser(6223))
+all_teams = []
+wanted_format = ["S & V", "S / V", "S&V", "S/V", "Scarlet", "Champions"]
+last_id_seen = 6285
+new_id = 1
+for team_id in range(new_id, last_id_seen + 1):
+    record = sparser(team_id)
+    if record != None: 
+        for entry in record:
+            if any(f in entry["format"] for f in wanted_format):
+                all_teams.append(entry)
+
+    if team_id % 100 == 0:
+        print(f"Progress: {team_id}/{last_id_seen} - {len(all_teams)} teams collected")
+ 
+    if team_id % 500 == 0:
+        with open("limitless_teams.json", "w", encoding="utf-8") as f:
+            json.dump(all_teams, f, indent=2, ensure_ascii=False)
+        print(f"Saved {len(all_teams)} teams")
+
+    time.sleep(1)
+
+with open("limitless_teams.json", "w", encoding="utf-8") as f:
+    json.dump(all_teams, f, indent=2, ensure_ascii=False)
+print(f"Saved {len(all_teams)} teams")
